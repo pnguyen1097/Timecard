@@ -1,0 +1,11 @@
+class App < Sinatra::Base
+
+  namepspace '/controller' do
+
+    get '/' do
+      erb :index
+    end
+
+  end
+
+end

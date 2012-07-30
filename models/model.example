@@ -1,0 +1,7 @@
+class Model
+  include DataMapper::Resource
+
+  property :id, Serial
+  property :name, Text
+
+end
