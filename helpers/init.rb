@@ -1,2 +1,2 @@
-#require_relative 'foo_helper'
-#App.helpers Foo
+require_relative 'auth'
+App.helpers Auth
