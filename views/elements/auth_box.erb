@@ -1,0 +1,5 @@
+<% if authorized? %>
+    <p class='navbar-text'><%= @username %> <a class='btn' href='/logout' title='Log out'>Log Out</a></p>
+<% else %>
+    <p class='navbar-text'><a class='btn' href='/login' title='Log in'>Log In</a></p>
+<% end %>

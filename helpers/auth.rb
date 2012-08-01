@@ -4,9 +4,15 @@ module Auth
     if session['auth']
       @username = session['auth']['name']
     else
-      redirect '/login'
+      return false
     end
 
+  end
+
+  def check_login
+    unless authorized? 
+      redirect '/login'
+    end
   end
   
 end

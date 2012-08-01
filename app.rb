@@ -4,7 +4,8 @@ require 'data_mapper'
 require 'omniauth'
 require 'omniauth-openid'
 require 'openid/store/memory'
-require 'pp'
+require 'sinatra/assetpack'
+require 'less'
 
 DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/dev.db")
 
@@ -18,12 +19,40 @@ class App < Sinatra::Base
     provider :open_id, :store => OpenID::Store::Memory.new, :name => :google, :identifier => 'https://www.google.com/accounts/o8/id'
   end
 
-  before do
-    puts "Session id = #{session[:id].inspect}"
+  # Assets
+  register Sinatra::AssetPack
+
+  Less.paths << "app/css"
+  assets do
+    serve '/js', from: 'public/js'
+    js :app, '/js/app.js', [
+      '/js/libs/jquery-1.7.2.min.js',
+      '/js/libs/modernizr-2.5.3-respond-1.1.0.min.js',
+      '/js/libs/bootstrap/transition.js',
+      '/js/libs/bootstrap/alert.js',
+      '/js/libs/bootstrap/button.js',
+      '/js/libs/bootstrap/carousel.js',
+      '/js/libs/bootstrap/collapse.js',
+      '/js/libs/bootstrap/dropdown.js',
+      '/js/libs/bootstrap/modal.js',
+      '/js/libs/bootstrap/tooltip.js',
+      '/js/libs/bootstrap/popover.js',
+      '/js/libs/bootstrap/scrollspy.js',
+      '/js/libs/bootstrap/tab.js',
+      '/js/libs/bootstrap/typeahead.js'
+    ]
+    css :main, '/css/styles.css', [
+      '/css/style.css'
+    ]
+    js_compression :jsmin
+    css_compression :simple
   end
   
+
+
+
   get '/' do
-    "<a href='/auth/google'>Sign in with Google</a>"
+    erb "<a href='/auth/google'>Sign in with Google</a>"
   end
   
 end
