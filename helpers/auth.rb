@@ -1,4 +1,4 @@
-module Foo
+module Auth
   def authorized?
 
     if session['auth']

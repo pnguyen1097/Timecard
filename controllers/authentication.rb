@@ -14,7 +14,6 @@ class App < Sinatra::Base
       omniauth = request.env['omniauth.auth']
       currentAuth = session['auth']
       if session['auth']
-        puts "\nUser is logged in.\n"
         if omniauth['uid'] != currentAuth['uid']
           account = Account.new
           account.provider = omniauth['provider']
@@ -31,7 +30,7 @@ class App < Sinatra::Base
         account.save
       end
 
-      session['auth'] = {'name' => omniauth['name'], 'provider' => account.provider, 'uid' => account.uid, 'user_id' => account.user.id}
+      session['auth'] = {'name' => omniauth['info']['name'], 'provider' => account.provider, 'uid' => account.uid, 'user_id' => account.user.id}
 
       redirect '/'
 

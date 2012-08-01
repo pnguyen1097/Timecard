@@ -17,6 +17,10 @@ class App < Sinatra::Base
   use OmniAuth::Builder do
     provider :open_id, :store => OpenID::Store::Memory.new, :name => :google, :identifier => 'https://www.google.com/accounts/o8/id'
   end
+
+  before do
+    puts "Session id = #{session[:id].inspect}"
+  end
   
   get '/' do
     "<a href='/auth/google'>Sign in with Google</a>"
