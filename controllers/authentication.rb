@@ -11,7 +11,6 @@ class App < Sinatra::Base
       # If not logged in, check if account exist, log that account.user in, 
       # If account doesn't exist, create new account + new user
 
-    rescue InvalidCredential
       omniauth = request.env['omniauth.auth']
       currentAuth = session['auth']
       if session['auth']

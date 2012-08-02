@@ -56,7 +56,7 @@ class App < Sinatra::Base
 
 
   get '/' do
-    erb "<a href='/auth/google'>Sign in with Google</a>"
+    erb :index
   end
   
 end
