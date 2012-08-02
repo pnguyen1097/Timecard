@@ -7,7 +7,6 @@ class App < Sinatra::Base
     end
 
     get '/?' do
-      puts session
       "You are #{@username}."
     end
 

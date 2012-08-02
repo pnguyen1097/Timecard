@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-feature 'User should be able to login using Google Account' do
+describe 'Sign in feature', :type => :request do
 
   OmniAuth.config.test_mode = true
   OmniAuth.config.mock_auth[:google] = OmniAuth::AuthHash.new({
@@ -9,17 +9,26 @@ feature 'User should be able to login using Google Account' do
     :info => {'name' => 'Phuoc Nguyen'}
   })
 
-  scenario 'User login with a valid Google Account' do
-    visit '/login'
-    click_on 'Sign in with Google'
-    page.should have_content('Phuoc Nguyen')
+  context 'when user is valid' do
+    it 'should sign user in if provided with a valid Google account' do
+      visit '/login'
+      click_on 'Sign in with Google'
+      page.should have_content('Phuoc Nguyen')
+    end
   end
 
-  scenario 'Sign in failed with the provider' do
-    visit '/login'
-    OmniAuth.config.mock_auth[:google] = :invalid_credentials
-    click_on 'Sign in with Google'
-    page.should have_content('Log In')
+  context 'when user is invalid' do
+    it 'should redirect to the login page if sign in failed' do
+      visit '/login'
+      OmniAuth.config.mock_auth[:google] = :invalid_credentials
+      click_on 'Sign in with Google'
+      current_path.should == '/login'
+    end
+
+    it 'should redirect to the login page if not logged-in when viewing protected page.' do
+      visit '/main'
+      current_path.should == '/login'
+    end
   end
 
 
