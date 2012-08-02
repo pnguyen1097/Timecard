@@ -1,8 +1,10 @@
 source 'https://rubygems.org'
 
 gem 'sinatra'
+gem 'sinatra-contrib'
 gem 'thin'
 gem 'data_mapper'
+gem 'json', '~> 1.6.1'
 gem 'dm-postgres-adapter'
 gem 'dm-sqlite-adapter', :group => :development
 gem 'pg', '0.10.0'
@@ -12,3 +14,9 @@ gem 'omniauth-openid'
 gem 'sinatra-assetpack', :require => 'sinatra/assetpack'
 gem 'less'
 gem "therubyracer" 
+
+group  :test do
+  gem 'rspec'
+  gem 'capybara'
+end
+

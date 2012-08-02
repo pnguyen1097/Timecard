@@ -1,5 +1,6 @@
 require 'sinatra/base'
 require 'sinatra/namespace'
+require 'sinatra/multi_route'
 require 'data_mapper'
 require 'omniauth'
 require 'omniauth-openid'
@@ -12,13 +13,16 @@ DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/dev.db")
 class App < Sinatra::Base
   
   register Sinatra::Namespace
+  register Sinatra::MultiRoute
 
   # Rack stuff
   use Rack::Session::Pool
   use OmniAuth::Builder do
     provider :open_id, :store => OpenID::Store::Memory.new, :name => :google, :identifier => 'https://www.google.com/accounts/o8/id'
   end
-
+  OmniAuth.config.on_failure = Proc.new { |env|
+    OmniAuth::FailureEndpoint.new(env).redirect_to_failure
+  }
   # Assets
   register Sinatra::AssetPack
 

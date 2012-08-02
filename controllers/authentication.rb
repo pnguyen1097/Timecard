@@ -6,11 +6,12 @@ class App < Sinatra::Base
   #                ['uid']
   #                ['user_id']
 
-    post '/auth/:provider/callback' do
+    route :get, :post, '/auth/:provider/callback' do
       # If logged in, check if account exist and associate with current user
       # If not logged in, check if account exist, log that account.user in, 
       # If account doesn't exist, create new account + new user
 
+    rescue InvalidCredential
       omniauth = request.env['omniauth.auth']
       currentAuth = session['auth']
       if session['auth']
@@ -34,6 +35,10 @@ class App < Sinatra::Base
 
       redirect '/'
 
+    end
+
+    get '/auth/failure' do
+      redirect '/'
     end
 
     get '/logout' do
