@@ -31,12 +31,11 @@ describe 'API', :type => :request do
 
     it 'GET /main/api/project should return a json formatted list of all project' do
       visit '/main/api/project'
-      page.should have_content(Project.all(:user_id => 1))
+      page.should have_content(Project.all(:user_id => 1).to_json)
     end
 
     it 'GET /main/api/project/:id should return a json formatted attributes of project[:id]' do
       visit '/main/api/project/1'
-      puts Project.get(1).to_json
       page.should have_content(Project.get(1).to_json)
     end
 
