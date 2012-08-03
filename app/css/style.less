@@ -3,7 +3,6 @@
 
 body {
   padding-bottom: 40px;
-  background-color: #fafafa;
 }
 
 @import "bootstrap/responsive.less";
@@ -15,5 +14,49 @@ body {
 
 .navbar-fixed-top {
     position: static;
-    margin-bottom: 27px;
+    margin-bottom: 16px;
 }
+
+.tabbable ul.nav-tabs {
+    width: 100%;
+    li.active a {
+        background-color: @bodyBackground;
+    }
+}
+
+#toolbar {
+    .clearfix();
+}
+
+#main {
+    .inline{
+        display: inline;
+    }
+
+    #header {
+        background-color: @bodyBackground;
+        border-bottom: 1px solid #ddd;
+    }
+
+
+    table {
+        table-layout: fixed;
+        .check {
+            width: 1em;
+        }
+        .date {
+            width: 6em;
+        }
+
+        .in { width: 3em; }
+        .out { width: 3em; }
+        .total { width: 4em; }
+        .comment {
+            word-wrap: break-word;
+        }
+
+
+    }
+}
+
+

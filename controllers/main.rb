@@ -10,6 +10,10 @@ class App < Sinatra::Base
       "You are #{@username}."
     end
 
+    get '/mock/?' do
+      erb :mock
+    end
+
   end
 
 end

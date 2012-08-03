@@ -1,5 +1,6 @@
 require 'sinatra/base'
 require 'sinatra/namespace'
+require 'sinatra/content_for'
 require 'sinatra/multi_route'
 require 'data_mapper'
 require 'omniauth'
@@ -14,6 +15,7 @@ class App < Sinatra::Base
   
   register Sinatra::Namespace
   register Sinatra::MultiRoute
+  helpers Sinatra::ContentFor
 
   # Rack stuff
   use Rack::Session::Pool
@@ -43,7 +45,8 @@ class App < Sinatra::Base
       '/js/libs/bootstrap/popover.js',
       '/js/libs/bootstrap/scrollspy.js',
       '/js/libs/bootstrap/tab.js',
-      '/js/libs/bootstrap/typeahead.js'
+      '/js/libs/bootstrap/typeahead.js',
+      '/js/*.js'
     ]
     css :main, '/css/styles.css', [
       '/css/style.css'

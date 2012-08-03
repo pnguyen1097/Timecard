@@ -4,7 +4,7 @@ describe 'Sign in feature', :type => :request do
 
   OmniAuth.config.test_mode = true
   OmniAuth.config.mock_auth[:google] = OmniAuth::AuthHash.new({
-    :provider => 'Google',
+    :provider => 'google',
     :uid => 'https://www.google.com/accounts/o8/id?id=AItOawm_DNI2mQM77rx6dbKe7dedUxsj-elvrHA',
     :info => {'name' => 'Phuoc Nguyen'}
   })
