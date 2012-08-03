@@ -55,6 +55,15 @@ describe 'API', :type => :request do
       proj.should be_nil
     end
 
+    it "should not do anything unless the project belong to current user" do
+      original = Project.get(3).project_name
+      page.driver.put'/main/api/project/3', :project_name => 'Stranger updated this'
+      proj = Project.get(3)
+      proj.project_name.should == original
+      page.driver.delete '/main/api/project/3'
+      proj.should_not be_nil
+    end
+
   end
 
 end
