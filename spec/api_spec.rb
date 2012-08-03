@@ -8,11 +8,16 @@ describe 'API', :type => :request do
   # Add data
   (1..3).each do |x|
     User.create
+    Account.create(:provider => "test_provider", :uid => "test_uid#{x}", :user_id => x)
     Project.create(:project_name => /\w+/.gen.capitalize, :for => /\w+/.gen.capitalize, :comment => /\w+ \w+ \w+ \w+ \w+/.gen, :user_id => x)
     Project.create(:project_name => /\w+/.gen.capitalize, :for => /\w+/.gen.capitalize, :comment => /\w+ \w+ \w+/.gen, :user_id => x)
   end
-  puts User.all.inspect
-  puts Project.all.inspect
+
+  OmniAuth.config.mock_auth[:google] = OmniAuth::AuthHash.new({
+    :provider => 'test_provider',
+    :uid => 'test_uid1',
+    :info => {'name' => 'Phuoc Nguyen'}
+  })
   
   before :each do
     # log in
