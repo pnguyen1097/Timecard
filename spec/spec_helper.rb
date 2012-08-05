@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'rack/test'
 require 'rspec'
+require 'json'
 require 'capybara/rspec'
 require 'dm-sweatshop'
 require_relative '../app.rb'

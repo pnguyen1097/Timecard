@@ -28,9 +28,9 @@ describe 'API', :type => :request do
     
 
     it 'POST /main/api/project should create a new project in the database' do
-      page.driver.post '/main/api/project', {:name => 'Test Project', :for => 'Taivara', :comment => '', :user_id => 1}
-      page.body.should == {:name => 'Test Project', :for => 'Taivara', :comment => '', :user_id => 1}.to_json 
-      proj = Project.get(:name => 'Test Project', :user_id => 1);
+      page.driver.post '/main/api/project', {:project_name => 'Test Project', :for => 'Taivara', :comment => '', :user_id => 1}.to_json
+      puts page.body
+      proj = Project.first(:project_name => 'Test Project', :user_id => 1);
       proj.should_not be_nil;
     end
 
