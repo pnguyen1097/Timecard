@@ -45,7 +45,8 @@ describe 'API', :type => :request do
     end
 
     it 'PUT /main/api/project/:id should update a project' do
-      page.driver.put '/main/api/project/1', {:project_name => 'Updated project', :for => 'Someone else', :comment => 'Changed comment, too'}
+      page.driver.put '/main/api/project/1', {:project_name => 'Updated project', :for => 'Someone else', :comment => 'Changed comment, too'}.to_json
+      page.should have_content({:id => 1, :project_name => 'Updated project', :for => 'Someone else', :comment => 'Changed comment, too'}.to_json)
       proj = Project.get(1)
       proj.project_name.should == 'Updated project'
       proj.for.should == 'Someone else'
