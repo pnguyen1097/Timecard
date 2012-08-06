@@ -61,9 +61,9 @@ describe 'API', :type => :request do
     end
 
     it "should not do anything unless the project belong to current user" do
-      original = Project.get(3).project_name
-      page.driver.put'/main/api/project/3', {:project_name => 'Changed'}.to_json
-      proj = Project.get(3)
+      original = Project.get(6).project_name
+      page.driver.put'/main/api/project/6', {:project_name => 'Changed'}.to_json
+      proj = Project.get(6)
       proj.project_name.should == original
       page.driver.delete '/main/api/project/3'
       proj.should_not be_nil

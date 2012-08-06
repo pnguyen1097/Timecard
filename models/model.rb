@@ -7,6 +7,7 @@ class User
 
   has n, :accounts
   has n, :projects
+  has n, :entries, :through => :projects
 
 end
 
@@ -47,5 +48,6 @@ class Entry
   property :updated_at, DateTime
 
   belongs_to :project
+  belongs_to :user
 end
 

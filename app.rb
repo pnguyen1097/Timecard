@@ -8,6 +8,7 @@ require 'omniauth-openid'
 require 'openid/store/memory'
 require 'sinatra/assetpack'
 require 'less'
+require 'json'
 
 DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/dev.db")
 
