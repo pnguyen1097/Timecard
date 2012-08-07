@@ -57,9 +57,9 @@ describe 'API', :type => :request do
     end
 
     it 'DELETE /main/api/project/:id/ should delete a project' do
-      page.driver.delete '/main/api/project/1'
+      page.driver.delete '/main/api/project/2'
       proj = ''
-      proj = Project.get(1)
+      proj = Project.get(2)
       proj.should be_nil
     end
 
@@ -75,11 +75,10 @@ describe 'API', :type => :request do
   end
 
   context 'when working with entries' do
-
     it 'POST /main/api/project/:project_id/entry should create a new project in the database' do
       page.driver.post '/main/api/project/1/entry', {:time_in => '2012-07-18T17:30:00.000Z', :time_out => '2012-07-18T20:30:00.000Z',:comment => '', :user_id => 1}.to_json
       puts page.body
-      entry = Entry.first(:time_out => DateTime.parse('2012-07-18T20:30:00.000Z'), :user_id => 1);
+      entry = Entry.last(:time_out => DateTime.parse('2012-07-18T20:30:00.000Z'), :user_id => 1);
       entry.should_not be_nil;
       page.should have_content(entry.to_json)
     end
@@ -96,22 +95,22 @@ describe 'API', :type => :request do
 
     it 'PUT /main/api/project/:project_id/entry/:entry_id should update an entry' do
       page.driver.put '/main/api/project/1/entry/1', { :time_in => '2013-01-01T14:30:00.000Z', :time_out => '2013-01-01T21:30:00.000Z', :comment => 'Changed comment, too'}.to_json
-      page.should have_content({:time_in => Date.parse('2013-01-01T14:30:00.000Z').to_s, :time_out => Date.parse('2013-01-01T21:30:00.000Z').to_s, :comment => 'Changed comment, too'}.to_json)
+      page.should have_content("\"comment\":\"Changed comment, too\"")
       entry = Entry.get(1)
-      entry.time_in.should == Date.parse('2013-01-01T14:30:00.000Z')
+      entry.time_in.should == DateTime.parse('2013-01-01T14:30:00.000Z')
       entry.comment.should == 'Changed comment, too'
     end
 
-    it 'DELETE /main/api/project/:project_id/entry/:entry_id should delete a project' do
+    it 'DELETE /main/api/project/:project_id/entry/:entry_id should delete an entry' do
       page.driver.delete '/main/api/project/1/entry/1'
       entry = ''
-      entry = Project.get(1)
+      entry = Entry.get(1)
       entry.should be_nil
     end
 
     it "should not do anything unless the project belong to current user" do
       original = Entry.get(6).comment
-      page.driver.put'/main/api/project/6/etnry/6', {:comment=> 'Changed'}.to_json
+      page.driver.put'/main/api/project/6/entry/6', {:comment=> 'Changed'}.to_json
       entry= Entry.get(6)
       entry.comment.should == original
       page.driver.delete '/main/api/project/6/entry/6'
