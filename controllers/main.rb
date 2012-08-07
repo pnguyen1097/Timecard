@@ -19,7 +19,10 @@ class App < Sinatra::Base
       helpers do
         def check_exist
           unless params[:project_id].nil?
-            halt 404 unless Project.first(:id => params[:project_id], :user_id => session['auth']['user_id'])
+            halt 404, 'Project not found' unless Project.first(:id => params[:project_id], :user_id => session['auth']['user_id'])
+          end
+          unless params[:entry_id].nil?
+            halt 404, 'Entry not found' unless Entry.first(:id => params[:entry_id], :project_id => params[:project_id])
           end
         end
       end
@@ -47,7 +50,7 @@ class App < Sinatra::Base
            :comment => project.comment
           }.to_json
         else
-          halt 400, project.errors
+          halt 400, project.errors.to_hash.to_json
         end
       end
 
@@ -88,7 +91,7 @@ class App < Sinatra::Base
       delete '/project/:project_id' do
         check_exist
         project = Project.get(params[:project_id])
-        if project.destroy
+        if project.entries.destroy && project.destroy
           status 200
           project.to_json
         else
@@ -101,28 +104,65 @@ class App < Sinatra::Base
       # Entries collection ==============
 
       # CREATE an entry
-      post '/project/:project_id/entries' do
+      post '/project/:project_id/entry' do
+        check_exist
+        request.body.rewind
+        data = JSON.parse request.body.read
+        entry = Entry.new
+        entry.time_in = DateTime.parse(data["time_in"])
+        entry.time_out = DateTime.parse(data["time_out"])
+        entry.comment = (data["comment"]) || ""
+        entry.project_id = params["project_id"]
+        entry.user_id = session['auth']['user_id']
+        if entry.save
+          status 201
+          entry.to_json
+        else
+          halt 400, entry.errors.to_hash.to_json
+        end
 
       end
 
       # INDEX all entries
-      get '/project/:project_id/entries' do
-
+      get '/project/:project_id/entry' do
+        check_exist
+        entries = Entry.all(:project_id => params[:project_id])
+        entries.to_json
       end
 
       # READ an entry
-      get '/project/:project_id/entries/:entry_id' do
-
+      get '/project/:project_id/entry/:entry_id' do
+        check_exist
+        entry = Entry.first(:project_id => params[:project_id], :id => params[:entry_id])
+        entry.to_json
       end
 
       # UPDATE an entry
-      put '/project/:project_id/entries/:entry_id' do
-
+      put '/project/:project_id/entry/:entry_id' do
+        check_exist
+        request.body.rewind
+        data = JSON.parse request.body.read
+        entry = Entry.first(:id => params[:entry_id])
+        entry.time_in = DateTime.parse(data["time_in"]) unless data["time_in"].nil?
+        entry.time_out = DateTime.parse(data["time_out"]) unless data["time_out"].nil?
+        entry.comment = data["comment"] unless data["comment"].nil?
+        if entry.save
+          status 200
+          entry.to_json
+        else
+          halt 400, entry.errors.to_hash.to_json
+        end
       end
 
       # DELETE an entry
-      delete '/project/:project_id/entries/:entry_id' do
-
+      delete '/project/:project_id/entry/:entry_id' do
+        check_exist
+        entry = Entry.first(:id => params[:entry_id])
+        if entry.destroy
+          status 200
+        else
+          halt 400, entry.errors.to_hash.to_json
+        end
       end
 
       # =================================
