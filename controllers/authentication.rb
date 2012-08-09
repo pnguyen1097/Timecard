@@ -32,11 +32,17 @@ class App < Sinatra::Base
 
       session['auth'] = {'name' => omniauth['info']['name'], 'provider' => account.provider, 'uid' => account.uid, 'user_id' => account.user.id}
 
-      redirect '/'
+      redirect '/main/app'
 
     end
 
     get '/auth/failure' do
+      puts params
+      if params[:strategy] == "identity"
+        session[:flash] = {"identity.error" => "Invalid username or password. Please try again."}
+      else
+        session[:flash] = {"provider.error" => "There was a problem signing in with your selected provider."}
+      end
       redirect '/login'
     end
 

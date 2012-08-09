@@ -1,11 +1,68 @@
+<% content_for :scripts do %>
+<div class="modal hide" id="openIDModal">
+    <form action='/auth/open_id' method='get'>
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">×</button>
+            <h2>Sign in using OpenID</h2>
+        </div>
+        <div class="modal-body">
+            <label for='openid_url'>OpenID URL:</label>
+            <input name='openid_url' type="text" class='input-block-level' />
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-dismiss="modal">Close</button>
+            <button type='submit' class="btn btn-primary">Sign In</button>
+        </div>
+    </form>
+</div>
+<% end %>
 <div class='container'>
     <div class='row'>
 
-        <div class='span6'>
-            <p><a href='/auth/google' title='Sign in with Google' class='btn'>Sign in with Google</a></p>
+        <div class='span12'>
+            <h1>Sign in</h1>
         </div>
-        <div class='span6'>
 
+        <div class='span6' id='federated'>
+            <h2>with one of these accounts</h2>
+            <% unless @flash["provider.error"].nil? %>
+                <div class='alert alert-error'>
+                <%= @flash["provider.error"] %>
+                </div>
+            <% end %>
+                <div class='row'>
+                    <p>
+                        <a href='/auth/google' title='Sign in with Google' id="btnGoogle" class='span4 btn btn-large'>
+                            <img src="/img/google_32.png" alt="" /> Sign in with Google
+                        </a>
+                    </p>
+                    <p>
+                        <a href='/auth/yahoo' title='Sign in with Yahoo!' id="btnYahoo" class='span4 btn btn-large'>
+                            <img src="/img/yahoo_32.png" alt="" /> Sign in with Yahoo!
+                        </a>
+                    </p>
+                    <p>
+                        <a href='#openIDModal' data-toggle="modal" title='Sign in with OpenID' id="btnOpenID" class='span4 btn btn-large'>
+                            <img src="/img/openid_32.png" alt="" /> Sign in with OpenID
+                        </a>
+                    </p>
+                </div>
+        </div>
+        <div class='span6' id='identity'>
+            <h2>or with your username and password</h2>
+            <% unless @flash["identity.error"].nil? %>
+                <div class='alert alert-error'>
+                <%= @flash["identity.error"] %>
+                </div>
+            <% end %>
+            <form action="/auth/identity/callback" method="post">
+                <label for="username">Username:</label>
+                <input type="text" name="username" id="username"/>
+                <label for="password">Password:</label>
+                <input type="password" name="password" id="password"/> <br />
+                <p> <button type="submit" class='btn btn-large'>Sign In</button> </p>
+                <p>Don&rsquo;t have an account? <a href="/auth/register" title="Register now">Register now!</a></p>
+            </form>
         </div>
         
     </div>

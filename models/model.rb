@@ -11,6 +11,19 @@ class User
 
 end
 
+class Identity
+  include DataMapper::Resource
+  include OmniAuth::Identity::Models::DataMapper
+
+  property :id, Serial
+  property :username, String
+  property :password_digest, Text
+
+  attr_accessor :password_confirmation
+
+  self.auth_key :username
+end
+
 class Account
   include DataMapper::Resource
 

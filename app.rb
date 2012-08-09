@@ -5,6 +5,7 @@ require 'sinatra/multi_route'
 require 'data_mapper'
 require 'omniauth'
 require 'omniauth-openid'
+require 'omniauth-identity'
 require 'openid/store/memory'
 require 'sinatra/assetpack'
 require 'less'
@@ -13,7 +14,7 @@ require 'json'
 DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/dev.db")
 
 class App < Sinatra::Base
-  
+
   register Sinatra::Namespace
   register Sinatra::MultiRoute
   helpers Sinatra::ContentFor
@@ -22,6 +23,11 @@ class App < Sinatra::Base
   use Rack::Session::Pool
   use OmniAuth::Builder do
     provider :open_id, :store => OpenID::Store::Memory.new, :name => :google, :identifier => 'https://www.google.com/accounts/o8/id'
+    provider :open_id, :store => OpenID::Store::Memory.new, :name => :yahoo, :identifier => 'http://yahoo.com'
+    provider :open_id, :store => OpenID::Store::Memory.new
+    provider :identity, :fields => [:username, :name], :locate_conditions => lambda {
+      {:username => req['auth_key']}
+    }
   end
   OmniAuth.config.on_failure = Proc.new { |env|
     OmniAuth::FailureEndpoint.new(env).redirect_to_failure
@@ -55,9 +61,13 @@ class App < Sinatra::Base
     js_compression :jsmin
     css_compression :simple
   end
-  
 
-
+  before do
+    @flash = session[:flash] || {}
+    puts "@flash"
+    puts @flash
+    session[:flash] = nil
+  end
 
   get '/' do
     erb :index
@@ -66,7 +76,7 @@ class App < Sinatra::Base
   get '/lorem' do
     erb :lorem
   end
-  
+
 end
 
 puts "Loading models"

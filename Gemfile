@@ -12,6 +12,7 @@ gem 'pg', '0.10.0'
 
 gem 'omniauth'
 gem 'omniauth-openid'
+gem 'omniauth-identity'
 gem 'sinatra-assetpack', :require => 'sinatra/assetpack'
 gem 'less'
 gem "therubyracer" 
