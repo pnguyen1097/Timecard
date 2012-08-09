@@ -9,6 +9,7 @@ class User
   has n, :projects
   has n, :entries, :through => :projects
 
+
 end
 
 class Identity
@@ -16,7 +17,8 @@ class Identity
   include OmniAuth::Identity::Models::DataMapper
 
   property :id, Serial
-  property :username, String
+  property :username, String, :unique => true, :required => true
+  property :name, String
   property :password_digest, Text
 
   attr_accessor :password_confirmation

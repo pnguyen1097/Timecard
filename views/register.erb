@@ -1,0 +1,160 @@
+<% content_for :scripts do %>
+<div class="modal hide" id="openIDModal">
+    <form action='/auth/open_id' method='get'>
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">×</button>
+            <h2>Sign in using OpenID</h2>
+        </div>
+        <div class="modal-body">
+            <label for='openid_url'>OpenID URL:</label>
+            <input name='openid_url' type="text" class='input-block-level' />
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-dismiss="modal">Close</button>
+            <button type='submit' class="btn btn-primary">Sign In</button>
+        </div>
+    </form>
+</div>
+<script>
+    $(document).ready(function() {
+
+        $('#check_username').click(function(e) {
+            e.preventDefault();
+            if ($('input[name="username"]').val() != "") {
+                $.post('/register/check_username', "username=" + $('input[name="username"]').val(), function(data) {
+                    if (data) {
+                        $('#check_username').parent().parent().parent().addClass('error').removeClass('success');
+                        $('#check_username').parent().find('.help-block').remove();
+                        $('#check_username').after($('<p class="help-block">This username is already taken.</p>'));
+                    } else { 
+                        $('#check_username').parent().parent().parent().removeClass('error').addClass('success');
+                        $('#check_username').parent().find('.help-block').remove();
+                        $('#check_username').after($('<p class="help-block">This username is available.</p>'));
+                    }
+                });
+            } else {
+                $('#check_username').parent().find('.help-block').remove();
+                $('#check_username').parent().parent().parent().removeClass('error').removeClass('success');
+            }
+        });
+
+        $('#signup_submit').click(function(e) {
+            e.preventDefault();
+            var validated = true;
+            if ($('input[name="username"]').val() == "") {
+                $('input[name="username"]').parent().parent().addClass("error");
+                $('input[name="username"]').after($("<p class='help-block'>A username is required</p>"));
+                validated = false;
+            } else {
+                $('input[name="username"]').parent().parent().removeClass("error");
+                $('input[name="username"]').parent().find(".help-block").remove();
+            }
+
+            if ($('input[name="name"]').val() == "") {
+                $('input[name="name"]').val($('input[name="username"]').val());
+            }
+
+            if ($('input[name="password"]').val() == "") {
+                $('input[name="password"]').parent().parent().addClass("error");
+                $('input[name="password"]').after($("<p class='help-block'>A password is required</p>"));
+                validated = false;
+            } else {
+                $('input[name="password"]').parent().parent().removeClass("error");
+                $('input[name="password"]').parent().find(".help-block").remove();
+            }
+
+            if ($('input[name="password_confirmation"]').val() != $('input[name="password"]').val()) {
+                $('input[name="password_confirmation"]').parent().parent().addClass("error");
+                $('input[name="password_confirmation"]').after($("<p class='help-block'>This field must match the password field.</p>"));
+                validated = false;
+            } else {
+                $('input[name="password_confirmation"]').parent().parent().removeClass("error");
+                $('input[name="password_confirmation"]').parent().find(".error").remove();
+            }
+
+            if (validated) {
+                $('#signup_form').submit();
+            }
+
+        });
+    });
+</script>
+<% end %>
+<div class='container'>
+    <div class='row'>
+
+        <div class='span12'>
+            <h1>Sign Up</h1>
+        </div>
+
+        <div class='span6' id='federated'>
+            <h2>1-click sign up</h2>
+            <% unless @flash["provider.error"].nil? %>
+                <div class='alert alert-error'>
+                <%= @flash["provider.error"] %>
+                </div>
+            <% end %>
+            <p>Quick, easy, secure! Sign up with one of the accounts below.</p>
+                <div class='row'>
+                    <p>
+                        <a href='/auth/google' title='Sign up with Google' id="btnGoogle" class='span4 btn btn-large'>
+                            <img src="/img/google_32.png" alt="" /> Sign up with Google
+                        </a>
+                    </p>
+                    <p>
+                        <a href='/auth/yahoo' title='Sign up with Yahoo!' id="btnYahoo" class='span4 btn btn-large'>
+                            <img src="/img/yahoo_32.png" alt="" /> Sign up with Yahoo!
+                        </a>
+                    </p>
+                    <p>
+                        <a href='#openIDModal' data-toggle="modal" title='Sign up with OpenID' id="btnOpenID" class='span4 btn btn-large'>
+                            <img src="/img/openid_32.png" alt="" /> Sign up with OpenID
+                        </a>
+                    </p>
+                </div>
+        </div>
+        <div class='span6' id='identity'>
+            <h2>Sign up for an account</h2>
+            <% unless @flash["username"].nil? %>
+                <div class='alert alert-error'>
+                <%= @flash["username"] %>
+                </div>
+            <% end %>
+            <form id="signup_form" class='form-horizontal' action="/auth/identity/register" method='post'>
+                <fieldset>
+                    <div class='control-group'>
+                        <label class='control-label' for='username' rel='popover' data-content='Required so you can log in' data-title='Username'>Username</label>
+                        <div class='controls'>
+                            <div class='input-append'>
+                                <input type='text' class='input-xlarge' name='username'/><a class='btn' id='check_username'><i class='icon-ok'></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='control-group'>
+                        <label class='control-label' for='name' rel='popover' data-title='Name' data-content='Not actually required. Will default to your username if not given.'>Name</label>
+                        <div class='controls'>
+                            <input type='text' class='input-xlarge' name='name'/>
+                        </div>
+                    </div>
+                    <div class='control-group'>
+                        <label class='control-label' for='password'>Password</label>
+                        <div class='controls'>
+                            <input type='password' class='input-xlarge' name='password'/>
+                        </div>
+                    </div>
+                    <div class='control-group'>
+                        <label class='control-label' for='password_confirmation'>Re-enter password</label>
+                        <div class='controls'>
+                            <input type='password' class='input-xlarge' name='password_confirmation'/>
+                        </div>
+                    </div>
+                    <div class='form-actions'>
+                        <a href='#' class='btn btn-primary' id='signup_submit'>Sign Up</a>
+                        <button class='btn' id='signup_submit' type='reset'>Reset</a>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+
+    </div>
+</div>

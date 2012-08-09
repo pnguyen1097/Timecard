@@ -20,7 +20,7 @@
     <div class='row'>
 
         <div class='span12'>
-            <h1>Sign in</h1>
+            <h1>Sign In</h1>
         </div>
 
         <div class='span6' id='federated'>
@@ -56,12 +56,12 @@
                 </div>
             <% end %>
             <form action="/auth/identity/callback" method="post">
-                <label for="username">Username:</label>
-                <input type="text" name="username" id="username"/>
+                <label for="auth_key">Username:</label>
+                <input type="text" name="auth_key" id="auth_key" class='input-xlarge'/>
                 <label for="password">Password:</label>
-                <input type="password" name="password" id="password"/> <br />
+                <input type="password" name="password" id="password" class='input-xlarge'/> <br />
                 <p> <button type="submit" class='btn btn-large'>Sign In</button> </p>
-                <p>Don&rsquo;t have an account? <a href="/auth/register" title="Register now">Register now!</a></p>
+                <p>Don&rsquo;t have an account? <a href="/register" title="Register now">Register now!</a></p>
             </form>
         </div>
         

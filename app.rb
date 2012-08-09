@@ -27,6 +27,16 @@ class App < Sinatra::Base
     provider :open_id, :store => OpenID::Store::Memory.new
     provider :identity, :fields => [:username, :name], :locate_conditions => lambda {
       {:username => req['auth_key']}
+    }, :on_failed_registration => Proc.new { |env|
+      error = env['omniauth.identity'].errors.to_hash
+      params = ''
+      error.keys.each do |key|
+        params += "&#{key}="
+        params += error[key][0].gsub(/ /,"%20").gsub(/"/,"%22")
+      end
+      resp = Rack::Response.new("", 302)
+      resp.redirect("/register?" + params)
+      resp.finish
     }
   end
   OmniAuth.config.on_failure = Proc.new { |env|

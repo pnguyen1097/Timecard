@@ -37,13 +37,12 @@ class App < Sinatra::Base
     end
 
     get '/auth/failure' do
-      puts params
       if params[:strategy] == "identity"
         session[:flash] = {"identity.error" => "Invalid username or password. Please try again."}
       else
         session[:flash] = {"provider.error" => "There was a problem signing in with your selected provider."}
       end
-      redirect '/login'
+      redirect params[:origin]
     end
 
     get '/logout' do
@@ -53,6 +52,26 @@ class App < Sinatra::Base
 
     get '/login' do
       erb :login
+    end
+
+    get '/register' do
+      unless params.length == 0
+        @flash ||= Hash.new
+        params.keys.each do |key|
+          @flash[key] = params[key]
+        end
+      end
+      erb :register
+    end
+
+    post '/register/check_username' do
+      # return true if username already exist
+      content_type :json
+      if Identity.first(:username => params[:username])
+        true.to_json
+      else
+        false.to_json
+      end
     end
 
 end
