@@ -50,6 +50,8 @@ class App < Sinatra::Base
     serve '/js', from: 'public/js'
     js :app, '/js/app.js', [
       '/js/libs/jquery-1.7.2.min.js',
+      '/js/libs/underscore-min.js',
+      '/js/libs/backbone-min.js',
       '/js/libs/modernizr-2.5.3-respond-1.1.0.min.js',
       '/js/libs/bootstrap/transition.js',
       '/js/libs/bootstrap/alert.js',

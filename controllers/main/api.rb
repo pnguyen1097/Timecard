@@ -17,6 +17,20 @@ class App < Sinatra::Base
         content_type :json
       end
 
+      # Index accounts
+      get '/account' do
+        Account.all(:user_id => session['auth']['user_id']).to_json
+      end
+
+      delete '/account/:id' do
+        acc = Account.first(:user_id => session['auth']['user_id'], :id => params[:id])
+        if acc.destroy
+          status 200
+        else
+          halt 400, acc.errors.to_hash.to_json
+        end
+      end
+
       # Project collection ==============
 
       # CREATE a new project

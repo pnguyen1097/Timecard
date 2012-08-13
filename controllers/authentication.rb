@@ -13,15 +13,9 @@ class App < Sinatra::Base
 
       omniauth = request.env['omniauth.auth']
       currentAuth = session['auth']
-      if session['auth']
-        if omniauth['uid'] != currentAuth['uid']
-          account = Account.new
-          account.provider = omniauth['provider']
-          account.uid = omniauth['uid']
-          account.user_id = currentAuth['user_id']
+      if currentAuth
+          account = Account.first_or_new(:provider => omniauth['provider'], :uid => omniauth['uid'], :user_id => currentAuth['user_id'])
           account.save
-        end
-        account = Account.first(:provider => omniauth['provider'], :uid => omniauth['uid'])
       else
         account = Account.first_or_new(:provider => omniauth['provider'], :uid => omniauth['uid'])
         if account.user.nil?
@@ -32,7 +26,11 @@ class App < Sinatra::Base
 
       session['auth'] = {'name' => omniauth['info']['name'], 'provider' => account.provider, 'uid' => account.uid, 'user_id' => account.user.id}
 
-      redirect '/main/app'
+      if env['omniauth.origin'].match('/login')
+        redirect '/main/app'
+      else
+        redirect env['omniauth.origin']
+      end
 
     end
 

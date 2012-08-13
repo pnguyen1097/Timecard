@@ -1,4 +1,5 @@
 require_relative './main/api.rb'
+require_relative './main/user_setting.rb'
 class App < Sinatra::Base
 
   namespace '/main' do

@@ -1,0 +1,168 @@
+<div class='container'>
+    <div class='row'>
+
+        <div class='span12'>
+            <h1>My Account</h1>
+        </div>
+        <div class='span12' id="linkedAccount">
+            <h2>Linked Accounts</h2>
+            <div class='row'>
+                <table class='table table-condensed span8'>
+                    <thead>
+                        <th>Provider</th>
+                        <th>UID</th>
+                        <th>Action</th>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <h3>Add a new account</h3>
+            <p class='btn-group'>
+                <a href='/auth/google' class='btn'><img src='/img/google_32.png' />Google</a>
+                <a href='/auth/yahoo' class='btn'><img src='/img/yahoo_32.png' />Yahoo</a>
+                <a href='#openIDModal' data-toggle="modal" class='btn'><img src="/img/openid_32.png" alt="" />OpenID</a>
+            </p>
+        </div>
+
+    </div>
+</div>
+
+<% content_for :scripts do %>
+
+<div class="modal hide" id="openIDModal">
+    <form action='/auth/open_id' method='get'>
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">×</button>
+            <h2>Sign in using OpenID</h2>
+        </div>
+        <div class="modal-body">
+            <label for='openid_url'>OpenID URL:</label>
+            <input name='openid_url' type="text" class='input-block-level' />
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-dismiss="modal">Close</button>
+            <button type='submit' class="btn btn-primary">Sign In</button>
+        </div>
+    </form>
+</div>
+
+<script>
+
+_.templateSettings = {
+     evaluate : /\{\[([\s\S]+?)\]\}/g,
+     interpolate : /\{\{([\s\S]+?)\}\}/g
+};
+
+var App = (function() {
+
+    var Models = (function() {
+
+        var Account = Backbone.Model.extend({});
+
+        return {
+            account: Account
+        }
+    })();
+
+    var Collections = (function() {
+        var Accounts = Backbone.Collection.extend({
+            model: Models.account,
+            url: '/main/api/account'
+        });
+
+        return {
+            accounts: Accounts
+        }
+    })();
+
+    var Views = (function() {
+        var MasterView = Backbone.View.extend({
+            el: $('#linkedAccount'),
+
+            initialize: function(options) {
+                this.collection = options.collection
+                this.collection.on('change', this.checkNumberOfAccount);
+            },
+
+            render: function() {
+                _.each(this.collection.models, function(account) {
+                    this.renderAccount(account);
+                }, this);
+                this.checkNumberOfAccount();
+            },
+
+            renderAccount: function(account) {
+                var accountRow = new AccountView({
+                    model: account
+                });
+
+                this.$el.find('tbody').append(accountRow.render().el);
+            },
+
+            checkNumberOfAccount: function() {
+                if (this.collection.models.length <= 1) {
+                    this.$el.find('.btnDelete').attr('disabled', 'disable');
+                }
+            },
+        });
+
+        var AccountView = Backbone.View.extend({
+            tagName: "tr",
+
+            template: "<td><img src='/img/{{provider}}_32.png' /></td><td>{{uid}}</td><td><button class='btn btnDelete'>Delete</button></td>",
+
+            events: {
+                "click.btnDelete" : "remove"
+            },
+
+            initialize: function(options) {
+                this.model.on("destroy", this.removeEl, this);
+            },
+
+            render: function() {
+                var tmpl = _.template(this.template);
+                this.$el.html(_.template(tmpl(this.model.toJSON())));
+                return this;
+            },
+
+            remove: function() {
+                var ok = confirm('Are you sure you want to delete this account?');
+                if (ok) {
+                    this.model.destroy();
+                }
+            },
+
+            removeEl: function() {
+                this.$el.remove();
+            }
+        });
+
+        return {
+            masterView: MasterView,
+            accountView: AccountView
+        }
+    })();
+
+    var accounts = new Collections.accounts;
+    var masterView = new Views.masterView({collection: accounts});
+
+    return {
+        accounts: accounts,
+        masterView: masterView
+    }
+
+})();
+
+
+$(document).ready(function() {
+    var data = <%= @accounts %>;
+    App.accounts.reset(data);
+    App.masterView.render();
+});
+
+
+
+</script>
+
+<% end %>
