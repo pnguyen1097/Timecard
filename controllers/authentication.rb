@@ -26,10 +26,15 @@ class App < Sinatra::Base
 
       session['auth'] = {'name' => omniauth['info']['name'], 'provider' => account.provider, 'uid' => account.uid, 'user_id' => account.user.id}
 
-      if env['omniauth.origin'].match('/login')
-        redirect '/main/app'
+      puts env['omniauth.origin'].inspect
+      if !(env['omniauth.origin'].nil?)
+        if env['omniauth.origin'].match('/login')
+          redirect '/main/app'
+        else
+          redirect env['omniauth.origin']
+        end
       else
-        redirect env['omniauth.origin']
+        redirect '/main/app'
       end
 
     end
@@ -40,7 +45,11 @@ class App < Sinatra::Base
       else
         session[:flash] = {"provider.error" => "There was a problem signing in with your selected provider."}
       end
-      redirect params[:origin]
+      if params[:origin].nil? 
+        redirect '/login'
+      else
+        redirect params[:origin]
+      end
     end
 
     get '/logout' do
