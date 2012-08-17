@@ -44,11 +44,10 @@ class App < Sinatra::Base
         project.user_id = session['auth']['user_id']
         if project.save
           status 201
-          {:id => project.id,
-           :project_name => project.project_name,
-           :for => project.for,
-           :comment => project.comment
-          }.to_json
+          hash = JSON.parse project.to_json
+          hash["numberOfEntries"] = project.entries.count
+          hash['totalHours'] = project.totalHours.to_f.round(2)
+          hash.to_json
         else
           halt 400, project.errors.to_hash.to_json
         end
@@ -57,13 +56,23 @@ class App < Sinatra::Base
       # INDEX all project
       get '/project' do
         check_exist
-        Project.all(:user_id => session['auth']['user_id']).to_json
+        array = Array.new
+        Project.all(:user_id => session['auth']['user_id']).each do |row|
+          hash = JSON.parse row.to_json
+          hash["numberOfEntries"] = row.entries.count
+          hash["totalHours"] = row.totalHours.to_f.round(2)
+          array << hash
+        end
+        array.to_json
       end
 
       # READ one project
       get '/project/:project_id' do
         check_exist
-        Project.get(params[:project_id]).to_json
+        hash = JSON.parse Project.get(params[:project_id]).to_json
+        hash["numberOfEntries"] = Project.get(params[:project_id]).entries.count
+        hash['totalHours'] = Project.get(params[:project_id]).totalHours.to_f.round(2)
+        hash.to_json
       end
 
       # UPDATE one project
@@ -77,11 +86,10 @@ class App < Sinatra::Base
         project.comment = data['comment'] || ''
         if project.save
           status 200
-          {:id => project.id,
-           :project_name => project.project_name,
-           :for => project.for,
-           :comment => project.comment
-          }.to_json
+          hash = JSON.parse project.to_json
+          hash["numberOfEntries"] = project.entries.count
+          hash['totalHours'] = project.totalHours.to_f.round(2)
+          hash.to_json
         else
           halt 400, project.errors.to_hash.to_json
         end
@@ -93,7 +101,6 @@ class App < Sinatra::Base
         project = Project.get(params[:project_id])
         if project.entries.destroy && project.destroy
           status 200
-          project.to_json
         else
           halt 400, project.errors.to_hash.to_json
         end

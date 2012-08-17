@@ -1,0 +1,41 @@
+<% content_for :stylesheet do %>
+    <link href='/css/overview.css' rel='stylesheet' />
+<% end %>
+<div class='container'>
+    <div class='row'>
+
+        <div class='span2' id='sidebar'>
+            <div class='row'>
+                <div class='span2 sticky'>
+                    <%= element 'project_sidebar' %>
+                </div>
+            </div>
+        </div>
+        <div class='span10'>
+            <h1>Overview</h1>
+            <div class='row' id="masterView">
+                <div class='span10'>
+                    <p> <a href='#' class='btn btnNew'> <i class='icon-plus-sign'></i> New Project</a></p>
+                </div>
+                <div id='projectHanger'>
+
+                </div>
+            </div>
+        </div>
+        
+    </div> <!-- Close row -->
+</div> <!-- Close container -->
+
+<% content_for :scripts do %>
+    <script src='/js/overview.js'></script>
+    <script>
+$(document).ready(function() {
+    Overview.masterCollection.fetch();
+    window.onhashchange = function() {
+        if (location.hash == '#new') {
+            Overview.masterView.newProject();
+        }
+    };
+});
+</script>
+<% end %>

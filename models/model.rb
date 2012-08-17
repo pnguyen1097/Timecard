@@ -46,11 +46,26 @@ class Project
   property :project_name, String
   property :for, String
   property :comment, Text
+  property :last_entry_updated_at, DateTime, :default => lambda { |r, p| DateTime.now }
   property :created_at, DateTime
   property :updated_at, DateTime
   
   belongs_to :user
   has n, :entries
+
+  before :save, :update_time
+
+  def totalHours
+    total = 0
+    self.entries.each do |entry|
+      total += (entry.time_out - entry.time_in) * 24
+    end
+    return total
+  end
+
+  def update_time
+    self.last_entry_updated_at = DateTime.now
+  end
 end
 
 class Entry
@@ -64,5 +79,14 @@ class Entry
 
   belongs_to :project
   belongs_to :user
+
+  before :save, :updateProject
+  before :create, :updateProject
+
+  def updateProject
+    p = self.project
+    p.last_entry_updated_at = DateTime.now
+    p.save
+  end
 end
 
