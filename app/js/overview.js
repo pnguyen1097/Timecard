@@ -18,7 +18,7 @@ var Overview = (function($) {
             model: Models.Project,
             url: '/main/api/project',
             comparator: function(item) {
-                return (0 - Date.parse(item.get('last_entry_updated_at')).getTime());
+                return (0 - moment(item.get('last_entry_updated_at')).unix());
             },
         });
 
@@ -69,7 +69,7 @@ var Overview = (function($) {
                 if (data.comment == "") {
                     data.comment = "<em>no description</em>"
                 }
-                data.last_entry_updated_at = Date.parse(data.last_entry_updated_at).toString("h:mm tt on M/dd/yyyy");
+                data.last_entry_updated_at = moment(data.last_entry_updated_at).fromNow() + moment(data.last_entry_updated_at).format(" (M/D/YYYY)");
                 this.$el.html(_.template(this.template, data));
                 return this;
             },

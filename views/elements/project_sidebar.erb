@@ -2,7 +2,12 @@
     <ul class='nav nav-tabs'>
         <li <%= if params[:project_id].nil? then "class='active'" end %>><a href='/main/app'>Overview</a></li>
         <% @projects.each do |row| %>
-            <% if row.id == params[:project_id] then cls='active' else cls='' end %>
+            <% if row.id == params[:project_id].to_i
+                   cls='active' 
+            else 
+                cls='none' 
+            end
+        %>
             <li class='<%= cls %>'><a href='/main/app/project/<%= row.id %>'><%= row.project_name %></a></li>
         <% end %>
         <li> <a href='/main/app#new'><i class='icon-plus-sign'></i> New project</a> </li>

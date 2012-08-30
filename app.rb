@@ -65,7 +65,7 @@ class App < Sinatra::Base
       '/js/libs/bootstrap/scrollspy.js',
       '/js/libs/bootstrap/tab.js',
       '/js/libs/bootstrap/typeahead.js',
-      '/js/libs/date.js',
+      '/js/libs/moment.min.js',
       '/js/libs/jquery-ui-1.8.23.min.js',
       '/js/sticky.js'
     ]

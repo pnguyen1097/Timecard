@@ -64,7 +64,7 @@ class Project
   end
 
   def update_time
-    self.last_entry_updated_at = DateTime.now
+    self.last_entry_updated_at = DateTime.now.new_offset(0)
   end
 end
 
