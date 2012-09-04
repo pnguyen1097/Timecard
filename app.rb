@@ -67,10 +67,14 @@ class App < Sinatra::Base
       '/js/libs/bootstrap/typeahead.js',
       '/js/libs/moment.min.js',
       '/js/libs/jquery-ui-1.8.23.min.js',
-      '/js/sticky.js'
+      '/js/libs/daterangepicker.jQuery.compressed.js',
+      '/js/jquery.stickyscroll.js'
     ]
     css :main, '/css/styles.css', [
-      '/css/style.css'
+      '/css/style.css',
+      '/css/jquery.ui.1.8.16.ie.css',
+      '/css/jquery-ui-1.8.16.custom.css',
+      '/css/ui.daterangepicker.css',
     ]
     js_compression :jsmin
     css_compression :simple

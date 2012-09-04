@@ -1,0 +1,72 @@
+@import "./bootstrap/mixins.less";
+@import "style.less";
+#toolbar {
+    .clearfix();
+}
+
+
+#main, #entryListing {
+    .inline{
+        display: inline;
+    }
+
+    #header {
+        background-color: @bodyBackground;
+        border-bottom: 1px solid #ddd;
+    }
+
+
+    table {
+        table-layout: fixed;
+        .check {
+            width: 1em;
+        }
+        .date {
+            width: 4em;
+        }
+
+        .in { width: 4em; }
+        .out { width: 4em; }
+        .total { width: 4em; }
+        .comment {
+            word-wrap: break-word;
+        }
+
+        tbody {
+            .date, .in, .out, .total {
+                text-align: right;
+            }
+        }
+        thead th{
+            text-align: center;
+        }
+
+        .emptyMsg {
+            font-style: italic;
+            text-align: center;
+        }
+
+        .selected {
+            @bg: #0064cd;
+            background-color: @bg;
+            color: white;
+            &:hover td{
+                background-color: @bg !important;
+            }
+        }
+    }
+}
+
+.newEntryDialog {
+    input {
+        font-family: HelveticaNeue, Helvetica, Arial, sans-serif;
+        color: black !important;
+        font-size: 16px !important;
+    }
+}
+.ui-autocomplete {
+    max-height: 300px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden;
+}
