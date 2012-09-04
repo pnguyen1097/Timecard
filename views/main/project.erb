@@ -1,0 +1,92 @@
+<% content_for :stylesheet do %>
+    <link href='/css/project.css' rel='stylesheet' />
+<% end %>
+<script type='text/template'>
+<div class="modal hide fade">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h2>Modal header</h2>
+        </div>
+        <div class="modal-body">
+            <p>One fine body…</p>
+        </div>
+        <div class="modal-footer">
+            <a href="#" class="btn">Close</a>
+            <a href="#" class="btn btn-primary">Save changes</a>
+        </div>
+    </div>
+</script>
+<div class='container'>
+    <div class='row'>
+
+        <div class='span2' id='sidebar'>
+            <div class='row stickyContainer'>
+                <div class='span2 sticky'>
+                    <%= element 'project_sidebar' %>
+                </div>
+            </div>
+        </div>
+
+        <div id='masterView'>
+
+            <div id='main' class='span7'>           
+                <div class='row'>
+                    <div class='span7 sticky' id='header'>
+                        <div class='btn-toolbar'>
+                            <h1 class='inline'><%= @project_name %></h1>
+                            <div class='pull-right'>
+                                <div class='btn-group'>
+                                    <a class='btn' id='btnAdd'><i class='icon-plus-sign'></i></a>
+                                    <a class='btn' id='btnDelete'><i class='icon-trash'></i></a>
+                                </div>
+                                <div class='btn-group'>
+                                    <a class='btn' id='btnPrevious'><i class='icon-chevron-left'></i></a>
+                                    <a class='btn' id='btnCurrentPage' disabled>1</a>
+                                    <a class='btn' id='btnNext'><i class='icon-chevron-right'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- Close header -->
+
+                <!-- Listing -->
+                <table id='entryTable' class='table table-condensed'>
+                    <thead>
+                        <tr>
+                            <th class='check'></th>
+                            <th class='date'>Date</th>
+                            <th class='in'>In</th>
+                            <th class='out'>Out</th>
+                            <th class='total'>Total</th>
+                            <th class='comment'>Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+                <!-- End listing -->
+            </div> <!-- Close id=main -->
+
+            <div id='extra' class='span3'>
+
+            </div><!--Close extra -->
+
+        </div><!-- Close master view -->
+    </div>
+</div>
+
+        
+    </div> <!-- Close row -->
+</div> <!-- Close container -->
+
+<% content_for :scripts do %>
+    <script src='/js/timecard.js'></script>
+    <script>
+$(document).ready(function() {
+    Timecard.masterCollection.baseURL = "/main/api/project/<%= params[:project_id]%>/entry";
+    Timecard.masterCollection.reset(<%= @entries %>);
+    Timecard.masterView.render();
+});
+</script>
+<% end %>

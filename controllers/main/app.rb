@@ -64,7 +64,8 @@ class App < Sinatra::Base
           opts[:time_in.gte] = startdate unless startdate.nil?
           opts[:time_in.lte] = enddate unless enddate.nil?
 
-          @entries = project.entries.all(opts)
+          @entries = project.entries.all(opts).to_json
+          @project_name = project.project_name
           erb :"/main/project"
         end
 

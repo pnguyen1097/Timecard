@@ -134,6 +134,7 @@ class App < Sinatra::Base
       get '/project/:project_id/entry' do
         check_exist
         # Which page
+        project = Project.get(params[:project_id])
         if params[:page].nil?
           page = 1
         else
