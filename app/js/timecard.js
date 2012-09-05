@@ -37,9 +37,16 @@ var Timecard = (function() {
                 return data;
             }
         });
+        
+        var PageData = Backbone.Model.extend({
+            url: function() {
+                return this.baseURL + "/pages"
+            },
+        });
 
         return {
-            Entry: Entry
+            Entry: Entry,
+            PageData: PageData
         }
     })();
 
@@ -53,6 +60,7 @@ var Timecard = (function() {
                 this.query = "";
                 this.dateRange = null;
                 this.on('add', this.refetch, this);
+                this.on('change:page', this.fetch);
             },
             url: function() {
                 result = this.baseURL + "?page=" + this.page;
@@ -72,7 +80,6 @@ var Timecard = (function() {
                 this.fetch();
                 if (this.models != oldModels) {
                     this.trigger("differ", model, options.index);
-                    console.log(model);
                 }
             },
         });
@@ -95,9 +102,10 @@ var Timecard = (function() {
             initialize: function(options) {
                 this.collection = options.collection;
                 this.EntryTable = new EntriesTable({collection: this.collection});
+                this.PageView = new PageView({table: this.EntryTable});
             },
             render: function() {
-                this.EntryTable.render();
+                this.PageView.render();
             },
 
             showAdd: function() {
@@ -115,10 +123,12 @@ var Timecard = (function() {
             el: $('#entryTable'),
             initialize: function() {
                 this.collection.on('differ', this.addOne, this); 
+                this.collection.on('reset', this.render, this);
             },
             render: function() {
+                this.$el.find('tbody').hide();
+                this.$el.find('tbody').empty();
                 if (this.collection.models.length > 0) {
-
                     _.each(this.collection.models, function(entry) {
                         this.renderEach(entry);
                     }, this);
@@ -126,6 +136,7 @@ var Timecard = (function() {
                 } else {
                     this.$el.find('tbody').append("<tr><td colspan=6 class='emptyMsg'>Nothing was found...</td></tr>");
                 }
+                this.$el.find('tbody').fadeIn(500);
                 return this;
             },
             renderEach: function(entry, index) {
@@ -388,8 +399,65 @@ var Timecard = (function() {
             },
         });
 
+        var PageView = Backbone.View.extend({
+            el: $("#pageView"), 
+            initialize: function(opts) {
+                this.table = opts.table;
+                this.page = 1;
+                this.model = new Models.PageData();
+                this.model.on('change', this.changePage, this);
+            },
+            events: {
+                "click #btnPrevious": "previous",
+                "click #btnNext": "next",
+            },
+            render: function() {
+                this.getPageData();
+                var total = this.model.get('total') || 0;
+                if (this.page == 1) {
+                    this.$el.find("#btnPrevious").addClass('disabled');
+                } else {
+                    this.$el.find("#btnPrevious").removeClass('disabled');
+                }
+                if (this.page >= total) {
+                    this.$el.find("#btnNext").addClass('disabled');
+                } else {
+                    this.$el.find("#btnNext").removeClass('disabled');
+                }
+            },
+            changePage: function() {
+                this.$el.find("#btnCurrentPage").text(this.page + "/" + this.model.get('total'));
+                this.render();
+            },
+            getPageData: function() {
+                console.log(this.table.collection.baseURL);
+                this.model.baseURL = this.table.collection.baseURL;
+                this.model.fetch();
+            },
+            previous: function(e) {
+                if ($(e.currentTarget).hasClass('disabled')) {
+                    return;
+                }
+                this.page--;
+                this.table.collection.page--;
+                this.table.collection.trigger('change:page');
+                this.render();
+                this.changePage();
+            },
+            next: function(e) {
+                if ($(e.currentTarget).hasClass('disabled')) {
+                    return;
+                }
+                this.page++;
+                this.table.collection.page++;
+                this.table.collection.trigger('change:page');
+                this.render();
+                this.changePage();
+            },
+        });
+
         return {
-            MasterView: MasterView
+            MasterView: MasterView,
         }
     })();
 

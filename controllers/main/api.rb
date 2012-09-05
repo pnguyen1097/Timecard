@@ -173,11 +173,12 @@ class App < Sinatra::Base
       end
 
       # GET pages info
-      get 'project/:project_id/entry/pages' do
+      get '/project/:project_id/entry/pages' do
         result = Hash.new
         count = Project.get(params[:project_id]).entries.count
         limit = params[:limit] || 31
         result[:total] = (count.to_f / limit.to_f).ceil
+        return result.to_json
       end
 
       # READ an entry

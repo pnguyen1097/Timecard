@@ -39,13 +39,12 @@
                                     <a class='btn' id='btnAdd'><i class='icon-plus-sign'></i></a>
                                     <a class='btn' id='btnDelete'><i class='icon-trash'></i></a>
                                 </div>
-                                <div class='btn-group'>
+                                <div id = 'pageView' class='btn-group'>
                                     <a class='btn' id='btnPrevious'><i class='icon-chevron-left'></i></a>
                                     <a class='btn' id='btnCurrentPage' disabled>1</a>
                                     <a class='btn' id='btnNext'><i class='icon-chevron-right'></i></a>
                                 </div>
-                            </div>
-                        </div>
+                            </div> </div>
                     </div>
                 </div> <!-- Close header -->
 
@@ -87,6 +86,7 @@ $(document).ready(function() {
     Timecard.masterCollection.baseURL = "/main/api/project/<%= params[:project_id]%>/entry";
     Timecard.masterCollection.reset(<%= @entries %>);
     Timecard.masterView.render();
+
 });
 </script>
 <% end %>
