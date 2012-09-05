@@ -40,7 +40,9 @@ var Timecard = (function() {
         
         var PageData = Backbone.Model.extend({
             url: function() {
-                return this.baseURL + "/pages"
+                var array = this.baseURL.split("?");
+                var url = array[0] + "/pages?" + array[1];
+                return url;
             },
         });
 
@@ -65,7 +67,7 @@ var Timecard = (function() {
             url: function() {
                 result = this.baseURL + "?page=" + this.page;
                 if (this.query != "") {
-                    result += "&query=" + this.query;
+                    result += "&q=" + this.query;
                 }
                 if (this.dateRange != null) {
                     result += "&daterange=" + this.dateRangeStr();
@@ -103,6 +105,8 @@ var Timecard = (function() {
                 this.collection = options.collection;
                 this.EntryTable = new EntriesTable({collection: this.collection});
                 this.PageView = new PageView({table: this.EntryTable});
+                this.SearchView = new SearchView({table: this.EntryTable});
+                this.EntryTable.on('render', this.PageView.render, this.PageView);
             },
             render: function() {
                 this.PageView.render();
@@ -126,6 +130,7 @@ var Timecard = (function() {
                 this.collection.on('reset', this.render, this);
             },
             render: function() {
+                this.trigger('render');
                 this.$el.find('tbody').hide();
                 this.$el.find('tbody').empty();
                 if (this.collection.models.length > 0) {
@@ -406,6 +411,7 @@ var Timecard = (function() {
                 this.page = 1;
                 this.model = new Models.PageData();
                 this.model.on('change', this.changePage, this);
+                this.table.collection.on('change', this.changePage, this);
             },
             events: {
                 "click #btnPrevious": "previous",
@@ -430,8 +436,7 @@ var Timecard = (function() {
                 this.render();
             },
             getPageData: function() {
-                console.log(this.table.collection.baseURL);
-                this.model.baseURL = this.table.collection.baseURL;
+                this.model.baseURL = this.table.collection.url();
                 this.model.fetch();
             },
             previous: function(e) {
@@ -456,12 +461,40 @@ var Timecard = (function() {
             },
         });
 
+        var SearchView = Backbone.View.extend({
+            el: $("#searchView"),
+            initialize: function(opts) {
+                this.table = opts.table;
+            },
+            events: {
+                "click #btnSearch": "search",
+                "click #btnClear": "clear",
+            },
+            search: function() {
+                if (this.$el.find('input').val() == "") {
+                    this.clear();
+                    return;
+                }
+                if (this.$el.find("#btnClear").length == 0) {
+                    this.$el.find("#btnSearch").after("<button title='Clear search' id='btnClear' class='btn'><i class='icon-remove'></i></button>");
+                }
+                this.table.collection.query = this.$el.find('input').val();
+                this.table.collection.fetch();
+            },
+            clear: function() {
+                this.$el.find("#btnClear").remove();
+                this.$el.find('input').val("");
+                this.table.collection.query = "";
+                this.table.collection.fetch();
+            },
+        });
+
         return {
             MasterView: MasterView,
         }
     })();
 
-    var masterCollection = new Collections.Entries({baseUrl: '/main/api/project/1/entry'});
+    var masterCollection = new Collections.Entries({baseURL: '/main/api/project/1/entry'});
     var masterView = new Views.MasterView({collection: masterCollection});
 
     return {

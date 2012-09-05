@@ -164,7 +164,7 @@ class App < Sinatra::Base
         opts[:order] = [:time_in.desc]
         opts[:offset] = offset
         opts[:limit] = limit
-        opts[:comment.like] = query unless query == ""
+        opts[:comment.like] = "%#{query}%" unless query == ""
         opts[:time_in.gte] = startdate unless startdate.nil?
         opts[:time_in.lte] = enddate unless enddate.nil?
 
@@ -174,9 +174,42 @@ class App < Sinatra::Base
 
       # GET pages info
       get '/project/:project_id/entry/pages' do
+
+        if params[:page].nil?
+          page = 1
+        else
+          page = params[:page].to_i
+        end
+        #How many per page
+        if params[:limit].nil?
+          limit = 31
+        else
+          limit = params[:limit].to_i
+        end
+        offset = (page - 1) * limit
+        # Search query
+        query = params[:q] || ""
+        # Date range
+        startdate, enddate = nil
+        unless params[:startdate].nil?
+          startdate = DateTime.parse(params[:startdate])
+          if params[:enddate].nil?
+            enddate = DateTime.now
+          else
+            enddate = DateTime.parse(params[:enddate])
+          end
+        end
+        # Build option hash
+        opts = Hash.new
+        opts[:order] = [:time_in.desc]
+        opts[:offset] = offset
+        opts[:comment.like] = "%#{query}%" unless query == ""
+        opts[:time_in.gte] = startdate unless startdate.nil?
+        opts[:time_in.lte] = enddate unless enddate.nil?
         result = Hash.new
-        count = Project.get(params[:project_id]).entries.count
-        limit = params[:limit] || 31
+
+        count = Project.get(params[:project_id]).entries.all(opts).length
+        puts count
         result[:total] = (count.to_f / limit.to_f).ceil
         return result.to_json
       end
