@@ -175,18 +175,12 @@ class App < Sinatra::Base
       # GET pages info
       get '/project/:project_id/entry/pages' do
 
-        if params[:page].nil?
-          page = 1
-        else
-          page = params[:page].to_i
-        end
         #How many per page
         if params[:limit].nil?
           limit = 31
         else
           limit = params[:limit].to_i
         end
-        offset = (page - 1) * limit
         # Search query
         query = params[:q] || ""
         # Date range
@@ -202,7 +196,6 @@ class App < Sinatra::Base
         # Build option hash
         opts = Hash.new
         opts[:order] = [:time_in.desc]
-        opts[:offset] = offset
         opts[:comment.like] = "%#{query}%" unless query == ""
         opts[:time_in.gte] = startdate unless startdate.nil?
         opts[:time_in.lte] = enddate unless enddate.nil?

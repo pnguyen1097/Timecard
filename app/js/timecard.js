@@ -109,7 +109,6 @@ var Timecard = (function() {
                 this.EntryTable.on('render', this.PageView.render, this.PageView);
             },
             render: function() {
-                this.PageView.render();
             },
 
             showAdd: function() {
@@ -173,18 +172,28 @@ var Timecard = (function() {
             tagName: "tr",
             events: {
                 "click td": "toggleSelect",
+                "dblclick td": "showEdit",
             },
             initialize: function(options) {
-                this.selected = options.selected || false
+                this.model.selected = options.selected || false
+                this.model.on('change', this.render, this);
+                this.model.on('destroy', this.destroy, this);
             },
             render: function() {
                 var data = this.model.templateData();
                 this.$el.html(_.template(this.template, data));
-                this.model.on('destroy', this.destroy, this);
+                if (this.model.selected) {
+                    this.$el.find("input[type='checkbox']").attr("checked", "checked");
+                } else {
+                    this.$el.find("input[type='checkbox']").removeAttr("checked");
+                }
                 return this;
             },
             toggleSelect: function() {
-                this.model.selected = !(this.model.selected);
+                this.setSelect(!this.model.selected);
+            },
+            setSelect: function(selected) {
+                this.model.selected = selected;
                 if (this.model.selected) {
                     this.$el.addClass('selected');
                     this.$el.find("input[type='checkbox']").attr('checked', true);
@@ -195,7 +204,159 @@ var Timecard = (function() {
             },
             destroy: function() {
                 this.$el.delay(5000).fadeOut(2000).remove();
+            },
+            showEdit: function() {
+                this.setSelect(true);
+                var editView = new EditView({model: this.model});
+                editView.render();
             }
+        });
+
+        var EditView = Backbone.View.extend({
+            template: "<div class='modal-header'>" +
+                "<button type='button' class='btnClose close' aria-hidden='true'>&times;</button>" +
+                "<h2>Edit Entry</h2>" +
+                "</div>" +
+                "<div class='modal-body'>" +
+                "<div class='row-fluid'>" +
+                "<div class='span3'>" +
+                "<label>Date: </label> " +
+                "<input type='text' class='newDate input-small' value='{{date}}'/>" +
+                "</div>" +
+                "<div class='span3'>" +
+                "<label>Time in: </label> " +
+                "<input placeholder='' id='time_in' type='text' title='Example: 01:14pm' class='time input-small' value='{{time_in}}'/>" +
+                "</div>" +
+                "<div class='span3'>" +
+                " <label> Time out: </label> " +
+                "<input placeholder='' id='time_out' type='text' title='Example: 01:14pm' class='time input-small' value='{{time_out}}'/>" +
+                "</div>" +
+                "<div class='span3'>" +
+                " <label> Total: </label> " +
+                "<span id='total' type='text'>{{total}} {{totalUnit}}</span>" +
+                "</div>" +
+                "</div>" +
+                "<div class='row-fluid'>" +
+                "<div class='span12'>" +
+                "<label>Comment:</label>" +
+                "<input class='input-block-level newComment' maxlength=50 value='{{comment}}'/>" +
+                "</div>" +
+                "</div>" +
+                "</div>" +
+                "<div class='modal-footer'>" +
+                "<a href='#' class='btn btnClose'>Close</a>" +
+                "<a href='#' class='btn btn-primary' id='btnSave'>Save changes</a>" +
+                "</div>",
+            events: {
+                "click .btnClose": "close",
+                "click #btnSave": "save",
+                "change .time": "recalculateTotal",
+                "select .time": "recalculateTotal",
+                "click .time": "suggest",
+            },
+            tagName: "div",
+            className: "newEntryDialog modal hide fade",
+            initialize: function() {
+                this.timeArray = [];
+                for (var z = 0; z < 2; z++ ) {
+                    if (z == 0) {
+                        var am = "am";
+                    } else {
+                        var am = "pm";
+                    }
+
+                    for (var i = 6; i < 18; i++) {
+                        if (i >= 12) {
+                            if (z == 0) {
+                                am = "pm";
+                            } else {
+                                am = "am";
+                            }
+                        }
+                        t = i % 12;
+
+                        if (t == 0) {
+                            t = 12;
+                        } else if (t < 10) {
+                            var leadingZero = "0";
+                        } else {
+                            var leadingZero = "";
+                        }
+                        this.timeArray.push(leadingZero + t + ":00" + am);
+                        this.timeArray.push(leadingZero + t + ":30" + am);
+                    }
+                }
+                _.bindAll(this, "recalculateTotal");
+            },
+            render: function() {
+                this.$el.html(this.template);
+                $('body').append(this.$el);
+                this.$el.modal();
+                var data = this.model.templateData();
+                data['date'] = moment(this.model.get('time_in')).format("MM/DD/YYYY");
+                this.$el.html(_.template(this.template, data));
+                this.$el.find('.time').autocomplete({source: this.timeArray, minLength: 0, change: this.recalculateTotal});
+                this.$el.find('.newDate').datepicker();
+            },
+            recalculateTotal: function(e) {
+                var that = this;
+                //Delay to get the text values properly
+                setTimeout(function() {
+                    that.$el.find(".time").removeClass('error');
+                    var time_in = moment(that.$el.find("#time_in").val(), "hh:mma");
+                    var time_out = moment(that.$el.find("#time_out").val(), "hh:mma");
+                    if ( (time_in != null) && (time_out != null)) {
+                        var total = time_out.diff(time_in) / 1000 / 60 / 60;
+                        if (total > 1) {
+                            var unit = "hrs";
+                        } else {
+                            var unit = "hr";
+                        }
+                        that.$el.find("#total").html(total.toFixed(1)+" "+unit);
+                    }
+                }, 50);
+            },
+            suggest: function(e) {
+                var that = e.currentTarget;
+                $(that).autocomplete("search", "");
+
+            },
+            close: function() {
+                this.$el.modal('hide');
+                this.undelegateEvents();
+                this.$el.removeData().unbind();
+                this.remove();
+            },
+            save: function() {
+                var date = moment(this.$el.find(".newDate").val(), "MM/DD/YYYY");
+                var time_in = moment(this.$el.find("#time_in").val(), "hh:mma");
+                var time_out = moment(this.$el.find("#time_out").val(), "hh:mma");
+                //check if filled out
+                if ( (date == null) || (time_in == null) || (time_out == null)) {
+                    alert("All of the fields are required.");
+                    return;
+                }
+                var total = time_out.diff(time_in) / 1000 / 60 / 60;
+                var conf = true;
+                //check if logging 0 hour.
+                if (total <= 0) {
+                    var conf = confirm("You're logging 0 hour or a negative time. Are you sure you want to continue?");
+                }
+                if (!conf) {
+                    return;
+                }
+                this.close();
+
+                //build model hash
+                var model = {};
+                model['time_in'] = time_in.date(date.date()).month(date.month()).year(date.year()).toDate().toJSON();
+                model['time_out'] = time_out.date(date.date()).month(date.month()).year(date.year()).toDate().toJSON();
+                model['comment'] = this.$el.find('input.newComment').val();
+
+                this.model.save(model);
+                this.model.selected = true;
+
+            },
         });
 
         var AddView = Backbone.View.extend({
@@ -408,7 +569,6 @@ var Timecard = (function() {
             el: $("#pageView"), 
             initialize: function(opts) {
                 this.table = opts.table;
-                this.page = 1;
                 this.model = new Models.PageData();
                 this.model.on('change', this.changePage, this);
                 this.table.collection.on('change', this.changePage, this);
@@ -420,19 +580,19 @@ var Timecard = (function() {
             render: function() {
                 this.getPageData();
                 var total = this.model.get('total') || 0;
-                if (this.page == 1) {
+                if (this.table.collection.page == 1) {
                     this.$el.find("#btnPrevious").addClass('disabled');
                 } else {
                     this.$el.find("#btnPrevious").removeClass('disabled');
                 }
-                if (this.page >= total) {
+                if (this.table.collection.page >= total) {
                     this.$el.find("#btnNext").addClass('disabled');
                 } else {
                     this.$el.find("#btnNext").removeClass('disabled');
                 }
             },
             changePage: function() {
-                this.$el.find("#btnCurrentPage").text(this.page + "/" + this.model.get('total'));
+                this.$el.find("#btnCurrentPage").text(this.table.collection.page + "/" + this.model.get('total'));
                 this.render();
             },
             getPageData: function() {
@@ -443,20 +603,16 @@ var Timecard = (function() {
                 if ($(e.currentTarget).hasClass('disabled')) {
                     return;
                 }
-                this.page--;
                 this.table.collection.page--;
                 this.table.collection.trigger('change:page');
-                this.render();
                 this.changePage();
             },
             next: function(e) {
                 if ($(e.currentTarget).hasClass('disabled')) {
                     return;
                 }
-                this.page++;
                 this.table.collection.page++;
                 this.table.collection.trigger('change:page');
-                this.render();
                 this.changePage();
             },
         });
@@ -478,6 +634,8 @@ var Timecard = (function() {
                 if (this.$el.find("#btnClear").length == 0) {
                     this.$el.find("#btnSearch").after("<button title='Clear search' id='btnClear' class='btn'><i class='icon-remove'></i></button>");
                 }
+                this.table.collection.page=1;
+                this.table.collection.trigger('change:page');
                 this.table.collection.query = this.$el.find('input').val();
                 this.table.collection.fetch();
             },
