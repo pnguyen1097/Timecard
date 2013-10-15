@@ -68,7 +68,7 @@ class App < Sinatra::Base
       '/js/libs/moment.min.js',
       '/js/libs/jquery-ui-1.8.23.min.js',
       '/js/libs/daterangepicker.jQuery.compressed.js',
-      '/js/jquery.stickyscroll.js'
+      '/js/sticky.js'
     ]
     css :main, '/css/styles.css', [
       '/css/style.css',
