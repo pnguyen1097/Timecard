@@ -61,7 +61,6 @@ var Timecard = (function() {
                 this.page = 1;
                 this.query = "";
                 this.dateRange = null;
-                this.on('add', this.refetch, this);
                 this.on('change:page', this.fetch);
             },
             url: function() {
@@ -76,13 +75,6 @@ var Timecard = (function() {
             },
             comparator: function(entry) {
                 return 0 - moment(entry.get('time_in')).unix();
-            },
-            refetch: function(model, collection, options) {
-                var oldModels = _.clone(this.models);
-                this.fetch();
-                if (this.models != oldModels) {
-                    this.trigger("differ", model, options.index);
-                }
             },
         });
 
@@ -125,8 +117,23 @@ var Timecard = (function() {
         var EntriesTable = Backbone.View.extend({
             el: $('#entryTable'),
             initialize: function() {
-                this.collection.on('differ', this.addOne, this); 
+                this.collection.on('add', this.addOne, this);
                 this.collection.on('reset', this.render, this);
+                this.collection.on('remove', this.onRemove, this);
+                this.collection.on('add', this.onAdd, this);
+            },
+            renderNothing: function() {
+                this.$el.find('tbody').empty().append("<tr><td colspan=6 class='emptyMsg'>Nothing to see here...</td></tr>");
+            },
+            onRemove: function() {
+              if (this.collection.models.length === 0) {
+                this.renderNothing();
+              }
+            },
+            onAdd: function() {
+              if (this.collection.models.length > 0) {
+                this.$el.find('.emptyMsg').remove();
+              }
             },
             render: function() {
                 this.trigger('render');
@@ -138,7 +145,7 @@ var Timecard = (function() {
                     }, this);
 
                 } else {
-                    this.$el.find('tbody').append("<tr><td colspan=6 class='emptyMsg'>Nothing was found...</td></tr>");
+                  this.renderNothing();
                 }
                 this.$el.find('tbody').fadeIn(500);
                 return this;
@@ -147,18 +154,20 @@ var Timecard = (function() {
                 var entryView = new Entry({
                     model: entry
                 });
-                if (index === null) {
+                if (!index) {
                     this.$el.find('tbody').append((entryView.render().el));
                 } else {
                     if (index === 0) {
                         this.$el.find('tbody').prepend(entryView.render().el).children().eq(0).hide().delay(1000).fadeIn(1000);
                     } else {
-                        this.$el.find('tbody').children().eq(index).before(entryView.render().el).prev().hide().delay(1000).fadeIn(1000);
+                        this.$el.find('tbody').children().eq(index - 1).after(entryView.render().el);
+                        entryView.$el.hide().delay(1000).fadeIn(1000);
                     }
                 }
             },
-            addOne: function(model, index) {
-                this.renderEach(model, index);
+            addOne: function(model, collection, options) {
+                console.log(options);
+                this.renderEach(model, options.index);
             },
         });
 
