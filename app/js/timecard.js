@@ -9,7 +9,7 @@ var Timecard = (function() {
 
         var Entry = Backbone.Model.extend({
             url: function() {
-                if (this.id != undefined) {
+                if (this.id !== undefined) {
                     return this.collection.baseURL + "/" + this.id;
                 } else {
                     return this.collection.baseURL;
@@ -24,15 +24,15 @@ var Timecard = (function() {
             templateData: function() {
                 var json = this.toJSON();
                 var data = {};
-                data['date'] = moment(json.time_in).format("MMM DD");
-                data['time_in'] = moment(json.time_in).format("h:mma");
-                data['time_out'] = moment(json.time_out).format("h:mma");
-                data['comment'] = json.comment; 
-                data['total'] = Math.round((moment(json.time_out).diff(moment(json.time_in)) / 1000 / 60 / 60) * 10) / 10;
-                if (data['total'] > 1) {
-                    data['totalUnit'] = 'hrs';
+                data.date = moment(json.time_in).format("MMM DD");
+                data.time_in = moment(json.time_in).format("h:mma");
+                data.time_out = moment(json.time_out).format("h:mma");
+                data.comment = json.comment; 
+                data.total = Math.round((moment(json.time_out).diff(moment(json.time_in)) / 1000 / 60 / 60) * 10) / 10;
+                if (data.total > 1) {
+                    data.totalUnit = 'hrs';
                 } else {
-                    data['totalUnit'] = 'hr';
+                    data.totalUnit = 'hr';
                 }
                 return data;
             }
@@ -49,7 +49,7 @@ var Timecard = (function() {
         return {
             Entry: Entry,
             PageData: PageData
-        }
+        };
     })();
 
     var Collections = (function() {
@@ -66,10 +66,10 @@ var Timecard = (function() {
             },
             url: function() {
                 result = this.baseURL + "?page=" + this.page;
-                if (this.query != "") {
+                if (this.query !== "") {
                     result += "&q=" + this.query;
                 }
-                if (this.dateRange != null) {
+                if (this.dateRange !== null) {
                     result += "&daterange=" + this.dateRangeStr();
                 }
                 return result;
@@ -89,7 +89,7 @@ var Timecard = (function() {
 
         return {
             Entries: Entries
-        }
+        };
     })();
 
     var Views = (function() {
@@ -147,10 +147,10 @@ var Timecard = (function() {
                 var entryView = new Entry({
                     model: entry
                 });
-                if (index == null) {
+                if (index === null) {
                     this.$el.find('tbody').append((entryView.render().el));
                 } else {
-                    if (index == 0) {
+                    if (index === 0) {
                         this.$el.find('tbody').prepend(entryView.render().el).children().eq(0).hide().delay(1000).fadeIn(1000);
                     } else {
                         this.$el.find('tbody').children().eq(index).before(entryView.render().el).prev().hide().delay(1000).fadeIn(1000);
@@ -175,7 +175,7 @@ var Timecard = (function() {
                 "dblclick td": "showEdit",
             },
             initialize: function(options) {
-                this.model.selected = options.selected || false
+                this.model.selected = options.selected || false;
                 this.model.on('change', this.render, this);
                 this.model.on('destroy', this.destroy, this);
             },
@@ -258,16 +258,17 @@ var Timecard = (function() {
             className: "newEntryDialog modal hide fade",
             initialize: function() {
                 this.timeArray = [];
+                var am = "", leadingZero = "";
                 for (var z = 0; z < 2; z++ ) {
-                    if (z == 0) {
-                        var am = "am";
+                    if (z === 0) {
+                        am = "am";
                     } else {
-                        var am = "pm";
+                        am = "pm";
                     }
 
                     for (var i = 6; i < 18; i++) {
                         if (i >= 12) {
-                            if (z == 0) {
+                            if (z === 0) {
                                 am = "pm";
                             } else {
                                 am = "am";
@@ -275,12 +276,12 @@ var Timecard = (function() {
                         }
                         t = i % 12;
 
-                        if (t == 0) {
+                        if (t === 0) {
                             t = 12;
                         } else if (t < 10) {
-                            var leadingZero = "0";
+                            leadingZero = "0";
                         } else {
-                            var leadingZero = "";
+                            leadingZero = "";
                         }
                         this.timeArray.push(leadingZero + t + ":00" + am);
                         this.timeArray.push(leadingZero + t + ":30" + am);
@@ -293,7 +294,7 @@ var Timecard = (function() {
                 $('body').append(this.$el);
                 this.$el.modal();
                 var data = this.model.templateData();
-                data['date'] = moment(this.model.get('time_in')).format("MM/DD/YYYY");
+                data.date = moment(this.model.get('time_in')).format("MM/DD/YYYY");
                 this.$el.html(_.template(this.template, data));
                 this.$el.find('.time').autocomplete({source: this.timeArray, minLength: 0, change: this.recalculateTotal});
                 this.$el.find('.newDate').datepicker();
@@ -302,15 +303,16 @@ var Timecard = (function() {
                 var that = this;
                 //Delay to get the text values properly
                 setTimeout(function() {
+                    var unit = "hr";
                     that.$el.find(".time").removeClass('error');
                     var time_in = moment(that.$el.find("#time_in").val(), "hh:mma");
                     var time_out = moment(that.$el.find("#time_out").val(), "hh:mma");
-                    if ( (time_in != null) && (time_out != null)) {
+                    if ( (time_in !== null) && (time_out !== null)) {
                         var total = time_out.diff(time_in) / 1000 / 60 / 60;
                         if (total > 1) {
-                            var unit = "hrs";
+                            unit = "hrs";
                         } else {
-                            var unit = "hr";
+                            unit = "hr";
                         }
                         that.$el.find("#total").html(total.toFixed(1)+" "+unit);
                     }
@@ -332,7 +334,7 @@ var Timecard = (function() {
                 var time_in = moment(this.$el.find("#time_in").val(), "hh:mma");
                 var time_out = moment(this.$el.find("#time_out").val(), "hh:mma");
                 //check if filled out
-                if ( (date == null) || (time_in == null) || (time_out == null)) {
+                if ( (date === null) || (time_in === null) || (time_out === null)) {
                     alert("All of the fields are required.");
                     return;
                 }
@@ -340,7 +342,7 @@ var Timecard = (function() {
                 var conf = true;
                 //check if logging 0 hour.
                 if (total <= 0) {
-                    var conf = confirm("You're logging 0 hour or a negative time. Are you sure you want to continue?");
+                    conf = confirm("You're logging 0 hour or a negative time. Are you sure you want to continue?");
                 }
                 if (!conf) {
                     return;
@@ -349,9 +351,9 @@ var Timecard = (function() {
 
                 //build model hash
                 var model = {};
-                model['time_in'] = time_in.date(date.date()).month(date.month()).year(date.year()).toDate().toJSON();
-                model['time_out'] = time_out.date(date.date()).month(date.month()).year(date.year()).toDate().toJSON();
-                model['comment'] = this.$el.find('input.newComment').val();
+                model.time_in = time_in.date(date.date()).month(date.month()).year(date.year()).toDate().toJSON();
+                model.time_out = time_out.date(date.date()).month(date.month()).year(date.year()).toDate().toJSON();
+                model.comment = this.$el.find('input.newComment').val();
 
                 this.model.save(model);
                 this.model.selected = true;
@@ -404,17 +406,18 @@ var Timecard = (function() {
             tagName: "div",
             className: "newEntryDialog modal hide fade",
             initialize: function() {
+                var am = "am", leadingZero = "";
                 this.timeArray = [];
                 for (var z = 0; z < 2; z++ ) {
-                    if (z == 0) {
-                        var am = "am";
+                    if (z === 0) {
+                        am = "am";
                     } else {
-                        var am = "pm";
+                        am = "pm";
                     }
 
                     for (var i = 6; i < 18; i++) {
                         if (i >= 12) {
-                            if (z == 0) {
+                            if (z === 0) {
                                 am = "pm";
                             } else {
                                 am = "am";
@@ -422,12 +425,12 @@ var Timecard = (function() {
                         }
                         t = i % 12;
                         
-                        if (t == 0) {
+                        if (t === 0) {
                             t = 12;
                         } else if (t < 10) {
-                            var leadingZero = "0";
+                            leadingZero = "0";
                         } else {
-                            var leadingZero = "";
+                            leadingZero = "";
                         }
                         this.timeArray.push(leadingZero + t + ":00" + am);
                         this.timeArray.push(leadingZero + t + ":30" + am);
@@ -448,15 +451,16 @@ var Timecard = (function() {
                 var that = this;
                 //Delay to get the text values properly
                 setTimeout(function() {
+                    var unit = "";
                     that.$el.find(".time").removeClass('error');
                     var time_in = moment(that.$el.find("#time_in").val(), "hh:mma");
                     var time_out = moment(that.$el.find("#time_out").val(), "hh:mma");
-                    if ( (time_in != null) && (time_out != null)) {
+                    if ( (time_in !== null) && (time_out !== null)) {
                         var total = time_out.diff(time_in) / 1000 / 60 / 60;
                         if (total > 1) {
-                            var unit = "hrs";
+                            unit = "hrs";
                         } else {
-                            var unit = "hr";
+                            unit = "hr";
                         }
                         that.$el.find("#total").html(total.toFixed(1)+" "+unit);
                     }
@@ -478,7 +482,7 @@ var Timecard = (function() {
                 var time_in = moment(this.$el.find("#time_in").val(), "hh:mma");
                 var time_out = moment(this.$el.find("#time_out").val(), "hh:mma");
                 //check if filled out
-                if ( (date == null) || (time_in == null) || (time_out == null)) {
+                if ( (date === null) || (time_in === null) || (time_out === null)) {
                     alert("All of the fields are required.");
                     return;
                 }
@@ -486,7 +490,7 @@ var Timecard = (function() {
                 var conf = true;
                 //check if logging 0 hour.
                 if (total <= 0) {
-                    var conf = confirm("You're logging 0 hour or a negative time. Are you sure you want to continue?");
+                    conf = confirm("You're logging 0 hour or a negative time. Are you sure you want to continue?");
                 }
                 if (!conf) {
                     return;
@@ -495,9 +499,9 @@ var Timecard = (function() {
 
                 //build model hash
                 var model = {};
-                model['time_in'] = time_in.date(date.date()).month(date.month()).year(date.year()).toDate().toJSON();
-                model['time_out'] = time_out.date(date.date()).month(date.month()).year(date.year()).toDate().toJSON();
-                model['comment'] = this.$el.find('input.newComment').val();
+                model.time_in = time_in.date(date.date()).month(date.month()).year(date.year()).toDate().toJSON();
+                model.time_out = time_out.date(date.date()).month(date.month()).year(date.year()).toDate().toJSON();
+                model.comment = this.$el.find('input.newComment').val();
 
                 this.collection.create(model);
 
@@ -530,6 +534,7 @@ var Timecard = (function() {
             },
             render: function() {
                 var countSelected = 0;
+                var msg;
                 _.each(this.collection.models, function(model) {
                     if (model.selected) {
                         countSelected++;
@@ -537,15 +542,15 @@ var Timecard = (function() {
                 }, this);
                 if (countSelected > 0) {
                     if (countSelected > 1) {
-                        var msg = {msg: "Are you sure you want to delete these entries?"};
+                        msg = {msg: "Are you sure you want to delete these entries?"};
                     } else {
-                        var msg = {msg: "Are you sure you want to delete this entry?"};
+                        msg = {msg: "Are you sure you want to delete this entry?"};
                     }
                 } else {
-                    var msg = {msg: "No entries was selected."};
+                    msg = {msg: "No entries was selected."};
                 }
                 this.$el.html(_.template(this.template, msg));
-                if (countSelected == 0) {
+                if (countSelected === 0) {
                     this.$el.find("#btnDelete").hide();
                 }
                 $('body').append(this.$el);
@@ -627,11 +632,11 @@ var Timecard = (function() {
                 "click #btnClear": "clear",
             },
             search: function() {
-                if (this.$el.find('input').val() == "") {
+                if (this.$el.find('input').val() === "") {
                     this.clear();
                     return;
                 }
-                if (this.$el.find("#btnClear").length == 0) {
+                if (this.$el.find("#btnClear").length === 0) {
                     this.$el.find("#btnSearch").after("<button title='Clear search' id='btnClear' class='btn'><i class='icon-remove'></i></button>");
                 }
                 this.table.collection.page=1;
@@ -649,7 +654,7 @@ var Timecard = (function() {
 
         return {
             MasterView: MasterView,
-        }
+        };
     })();
 
     var masterCollection = new Collections.Entries({baseURL: '/main/api/project/1/entry'});
@@ -658,5 +663,5 @@ var Timecard = (function() {
     return {
         masterCollection: masterCollection,
         masterView: masterView
-    }
+    };
 })();
